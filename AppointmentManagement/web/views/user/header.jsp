@@ -315,7 +315,7 @@
                             <li><a href="home#services">Dịch vụ</a></li>
                             <li><a href="home#doctors">Bác sỹ</a></li>
 
-                            <li><a href="home#contact">Liênn hệ</a></li>
+                            <li><a href="home#contact">Liên hệ</a></li>
                         </ul>
                         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
                     </nav>
