@@ -1,6 +1,7 @@
 package model;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+
 
 public class Users {
 
@@ -8,20 +9,18 @@ public class Users {
     private String username;
     private String passwordHash;
     private String fullName;
-    private String email;
+        private String email;
     private String phone;
     private String role;
     private boolean isActive;
     private String note;
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     // Constructors (optional)
     public Users() {
     }
 
-    public Users(int userId, String username, String passwordHash, String fullName,
-            String email, String phone, String role, boolean isActive,
-            String note, LocalDateTime createdAt) {
+    public Users(int userId, String username, String passwordHash, String fullName, String email, String phone, String role, boolean isActive, String note, Date createdAt) {
         this.userId = userId;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -33,6 +32,7 @@ public class Users {
         this.note = note;
         this.createdAt = createdAt;
     }
+
 
     // Getters and Setters
     public int getUserId() {
@@ -107,13 +107,14 @@ public class Users {
         this.note = note;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
 
     @Override
     public String toString() {

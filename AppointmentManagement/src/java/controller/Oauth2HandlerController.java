@@ -86,7 +86,7 @@ public class Oauth2HandlerController extends HttpServlet {
                     user.setFullName(name);
                     user.setPasswordHash("123456");
                     user.setPhone(""); // Chưa có
-                    user.setRole("USER");
+                    user.setRole("Patient");
                     user.setIsActive(true);
                     user.setNote("Tài khoản tạo từ Google Login");
 
@@ -104,8 +104,7 @@ public class Oauth2HandlerController extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute("currentUser", user);
 
-                // Redirect về trang chủ
-                response.sendRedirect("home");
+                response.sendRedirect(userDAO.responsePage(user.getRole()));
 
             } else {
                 response.sendRedirect("login?error=Invalid ID token.");

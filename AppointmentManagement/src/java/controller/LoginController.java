@@ -41,8 +41,9 @@ public class LoginController extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("currentUser", user);
 
+           
             // Chuyển về trang chủ
-            response.sendRedirect("home");
+            response.sendRedirect( userDAO.responsePage(user.getRole()));
         } else {
             // Sai thông tin đăng nhập
             request.setAttribute("error", "Sai thông tin đăng nhập hoặc tài khoản chưa được kích hoạt.");

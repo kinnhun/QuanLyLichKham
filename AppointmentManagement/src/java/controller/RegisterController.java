@@ -74,7 +74,7 @@ public class RegisterController extends HttpServlet {
         user.setEmail(email);
         user.setPhone(phone);
         user.setPasswordHash(password); // Nếu có mã hóa thì xử lý tại đây hoặc trong DAO
-        user.setRole("USER"); // mặc định USER
+        user.setRole("Patient"); // mặc định Patient
         user.setIsActive(true); // Đặt trạng thái kích hoạt
         user.setNote(null); // ban đầu chưa có ghi chú
 
