@@ -94,6 +94,9 @@ public class Oauth2HandlerController extends HttpServlet {
                     if (!success) {
                         response.sendRedirect("login?error=Không thể tạo tài khoản Google.");
                         return;
+                    } else {
+                        utils.EmailUtils.sendGoogleRegisterInfoEmail(user.getEmail(), user.getFullName(), user.getUsername(), "123456");
+
                     }
                 }
 

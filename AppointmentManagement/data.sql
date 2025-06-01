@@ -1,10 +1,4 @@
-﻿-- ================================================
--- DATABASE: ClinicBookingSystem
--- FULL STRUCTURE + VIEW — READY TO EXECUTE
--- Version: Chuẩn hóa mối quan hệ N-N (Bác sĩ - Khoa, Bác sĩ - Phòng)
--- Author: ChatGPT
--- Date: 2025-05-31
--- ================================================
+﻿
 
 -- Tạo database (nếu chưa có)
 CREATE   DATABASE ClinicBookingSystem;
@@ -224,3 +218,17 @@ INNER JOIN Doctors D ON MR.DoctorId = D.DoctorId
 INNER JOIN Users U ON D.UserId = U.UserId
 INNER JOIN Appointments A ON MR.AppointmentId = A.AppointmentId;
 GO
+
+
+
+
+  CREATE TABLE PasswordResetToken (
+    TokenId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    Token NVARCHAR(255) NOT NULL,
+    Expiry DATETIME NOT NULL,
+    IsUsed BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT FK_PasswordResetToken_User FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);

@@ -4,7 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import model.Users;
+import utils.PasswordUtils;
+import java.sql.*;
+import model.PasswordResetToken;
 
 public class UserDAO extends DBContext {
 
@@ -12,14 +16,14 @@ public class UserDAO extends DBContext {
         String sql = "INSERT INTO Users (Username, PasswordHash, FullName, Email, Phone, Role, IsActive, Note, CreatedAt) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
 
-        try {
-            // Mở connection mới từ DBContext
-            Connection conn = new DBContext().getConnection();
-
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPasswordHash());
+
+            // MÃ HÓA password ở đây:
+            String hashedPassword = PasswordUtils.hashPassword(user.getPasswordHash());
+            ps.setString(2, hashedPassword);
+
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getEmail());
             ps.setString(5, user.getPhone());
@@ -29,12 +33,9 @@ public class UserDAO extends DBContext {
 
             int rows = ps.executeUpdate();
 
-            ps.close();
-            conn.close(); // Đóng connection
-
             return rows > 0;
 
-        } catch (Exception e) {  // Bắt cả Exception để bắt lỗi ClassNotFoundException
+        } catch (Exception e) {
             System.out.println("Lỗi khi registerUser: " + e.getMessage());
             e.printStackTrace();
         }
@@ -96,57 +97,134 @@ public class UserDAO extends DBContext {
         return false;
     }
 
- public Users login(String usernameInput, String password) {
-    String sql = "SELECT * FROM Users "
-               + "WHERE (Username = ? OR Email = ? OR Phone = ?) "
-               + "AND PasswordHash = ? "
-               + "AND IsActive = 1";
+    public Users login(String usernameInput, String password) {
+        String sql = "SELECT * FROM Users "
+                + "WHERE (Username = ? OR Email = ? OR Phone = ?) "
+                + "AND PasswordHash = ? "
+                + "AND IsActive = 1";
 
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setString(1, usernameInput);
-        ps.setString(2, usernameInput);
-        ps.setString(3, usernameInput);
-        ps.setString(4, password); // Nếu có mã hóa password thì mã hóa trước khi truyền
+            ps.setString(1, usernameInput);
+            ps.setString(2, usernameInput);
+            ps.setString(3, usernameInput);
 
-        ResultSet rs = ps.executeQuery();
+            // MÃ HÓA password trước khi so sánh:
+            String hashedPassword = PasswordUtils.hashPassword(password);
+            ps.setString(4, hashedPassword);
 
-        if (rs.next()) {
-            // Nếu tìm thấy user → trả về đối tượng Users
-            Users user = new Users();
-            user.setUserId(rs.getInt("UserId"));
-            user.setUsername(rs.getString("Username"));
-            user.setPasswordHash(rs.getString("PasswordHash"));
-            user.setFullName(rs.getString("FullName"));
-            user.setEmail(rs.getString("Email"));
-            user.setPhone(rs.getString("Phone"));
-            user.setRole(rs.getString("Role"));
-            user.setIsActive(rs.getBoolean("IsActive"));
-            user.setNote(rs.getString("Note"));
-            user.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+            ResultSet rs = ps.executeQuery();
 
-            return user;
+            if (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("UserId"));
+                user.setUsername(rs.getString("Username"));
+                user.setPasswordHash(rs.getString("PasswordHash"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPhone(rs.getString("Phone"));
+                user.setRole(rs.getString("Role"));
+                user.setIsActive(rs.getBoolean("IsActive"));
+                user.setNote(rs.getString("Note"));
+                user.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+                return user;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi login: " + e.getMessage());
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        System.out.println("Lỗi khi login: " + e.getMessage());
-        e.printStackTrace();
+        return null;
     }
 
-    return null; // Không tìm thấy user hoặc có lỗi
-}
+    public Users getUserByEmail(String email) {
+        String sql = "SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Role, IsActive, Note, CreatedAt "
+                + "FROM Users WHERE Email = ?";
 
-public Users getUserByEmail(String email) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("UserId"));
+                user.setUsername(rs.getString("Username"));
+                user.setPasswordHash(rs.getString("PasswordHash"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPhone(rs.getString("Phone"));
+                user.setRole(rs.getString("Role"));
+                user.setIsActive(rs.getBoolean("IsActive"));
+                user.setNote(rs.getString("Note"));
+                user.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+                return user;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null; // Không tìm thấy
+    }
+
+    public Users getUserByPhone(String phone) {
+        String sql = "SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Role, IsActive, Note, CreatedAt "
+                + "FROM Users WHERE Phone = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, phone);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("UserId"));
+                user.setUsername(rs.getString("Username"));
+                user.setPasswordHash(rs.getString("PasswordHash"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPhone(rs.getString("Phone"));
+                user.setRole(rs.getString("Role"));
+                user.setIsActive(rs.getBoolean("IsActive"));
+                user.setNote(rs.getString("Note"));
+                user.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+                return user;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi getUserByPhone: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null; // Không tìm thấy
+    }
+
+    public void createToken(int userId, String token, java.time.LocalDateTime expiry) {
+        String sql = "INSERT INTO PasswordResetToken (UserId, Token, Expiry, IsUsed) VALUES (?, ?, ?, 0)";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setString(2, token);
+            ps.setTimestamp(3, Timestamp.valueOf(expiry));
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public Users getUserById(int userId) {
     String sql = "SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Role, IsActive, Note, CreatedAt "
-               + "FROM Users WHERE Email = ?";
-    
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        
-        ps.setString(1, email);
+            + "FROM Users WHERE UserId = ?";
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, userId);
         ResultSet rs = ps.executeQuery();
-        
+
         if (rs.next()) {
             Users user = new Users();
             user.setUserId(rs.getInt("UserId"));
@@ -161,13 +239,77 @@ public Users getUserByEmail(String email) {
             user.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
             return user;
         }
-        
+
     } catch (Exception e) {
+        System.out.println("Lỗi khi getUserById: " + e.getMessage());
         e.printStackTrace();
     }
-    
-    return null; // Không tìm thấy
+
+    return null;
+}
+public void updatePassword(int userId, String newPassword) {
+    String sql = "UPDATE Users SET PasswordHash = ? WHERE UserId = ?";
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        // Mã hóa mật khẩu mới
+        String hashedPassword = PasswordUtils.hashPassword(newPassword);
+
+        ps.setString(1, hashedPassword);
+        ps.setInt(2, userId);
+
+        ps.executeUpdate();
+
+    } catch (Exception e) {
+        System.out.println("Lỗi khi updatePassword: " + e.getMessage());
+        e.printStackTrace();
+    }
 }
 
+public void markTokenAsUsed(String token) {
+    String sql = "UPDATE PasswordResetToken SET IsUsed = 1 WHERE Token = ?";
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, token);
+        ps.executeUpdate();
+
+    } catch (Exception e) {
+        System.out.println("Lỗi khi markTokenAsUsed: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+   public PasswordResetToken getToken(String token) {
+    String sql = "SELECT * FROM PasswordResetToken WHERE Token = ?";
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, token);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            PasswordResetToken tokenObj = new PasswordResetToken();
+            tokenObj.setTokenId(rs.getInt("TokenId"));
+            tokenObj.setUserId(rs.getInt("UserId"));
+            tokenObj.setToken(rs.getString("Token"));
+            tokenObj.setExpiry(rs.getTimestamp("Expiry").toLocalDateTime());
+            tokenObj.setIsUsed(rs.getBoolean("IsUsed"));
+
+            return tokenObj;
+        }
+
+    } catch (Exception e) {
+        System.out.println("Lỗi khi getToken: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
+
+   
+
+  
 
 }
