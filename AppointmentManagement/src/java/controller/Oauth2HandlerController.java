@@ -1,14 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package controller;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.JsonFactory;
@@ -30,18 +24,18 @@ import java.util.Collections;
 public class Oauth2HandlerController extends HttpServlet {
 
     private static final String CLIENT_ID = "20495276859-asgm8cn4636ehlrsktoc6klk7ldujrp5.apps.googleusercontent.com";
-@Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    // Gọi lại doGet để xử lý
-    doGet(request, response);
-}
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response); // gọi lại GET
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Lấy token từ URL callback của Google
+        // Lấy credential token từ URL callback
         String credential = request.getParameter("credential");
 
         if (credential == null || credential.isEmpty()) {
@@ -62,7 +56,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
             if (idToken != null) {
                 Payload payload = idToken.getPayload();
 
-                // Thông tin người dùng
+                // Lấy thông tin user từ Google token
                 String email = payload.getEmail();
                 String name = (String) payload.get("name");
                 String pictureUrl = (String) payload.get("picture");
@@ -72,13 +66,26 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
                 Users user = userDAO.getUserByEmail(email);
 
                 if (user == null) {
-                    // Nếu user chưa có, tự động tạo mới
+                    // Nếu user chưa có → tạo mới
                     user = new Users();
-                    user.setUsername(email); // đặt username = email
+
+// Cắt username từ email
+                    String usernamePart = email.substring(0, email.indexOf("@"));
+                    String finalUsername = usernamePart;
+                    int counter = 1;
+
+// Nếu username đã tồn tại → thêm hậu tố
+                    while (userDAO.isUsernameExists(finalUsername)) {
+                        finalUsername = usernamePart + counter;
+                        counter++;
+                    }
+
+                    user.setUsername(finalUsername);
+
                     user.setEmail(email);
                     user.setFullName(name);
-                    user.setPasswordHash(""); // không có password vì login qua Google
-                    user.setPhone(""); // chưa có
+                    user.setPasswordHash("123456");
+                    user.setPhone(""); // Chưa có
                     user.setRole("USER");
                     user.setIsActive(true);
                     user.setNote("Tài khoản tạo từ Google Login");
@@ -111,5 +118,4 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
     public String getServletInfo() {
         return "OAuth2 Google Login Handler";
     }
-
 }
