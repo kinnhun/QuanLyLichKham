@@ -9,11 +9,11 @@ public class DBContext {
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         // Gắn toàn bộ thông tin kết nối vào URL
         String url = "jdbc:sqlserver://localhost:1433;"
-                   + "databaseName=ClinicBookingSystem;"
-                   + "user=sa;"
-                   + "password=123456;"
-                   + "encrypt=true;"
-                   + "trustServerCertificate=true";
+                + "databaseName=ClinicBookingSystem;"
+                + "user=sa;"
+                + "password=123456;"
+                + "encrypt=true;"
+                + "trustServerCertificate=true";
 
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         return DriverManager.getConnection(url);
