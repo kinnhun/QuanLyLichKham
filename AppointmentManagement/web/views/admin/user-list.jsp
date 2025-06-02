@@ -46,7 +46,30 @@
                             <div class="col-12 grid-margin stretch-card">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h4 class="card-title">Danh sách Users</h4>
+                                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h4 class="card-title" style="margin: 0;">Danh sách Users</h4>
+    <div>
+        <button onclick="createUser()" style="
+    background-color: #3fbbc0;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.3s ease;
+">+ Tạo người dùng</button>
+
+<script>
+    function createUser() {
+        window.location.href = 'add-user'; // trỏ đến controller AddUserController
+    }
+</script>
+
+       
+    </div>
+</div>
+
 
 
 
