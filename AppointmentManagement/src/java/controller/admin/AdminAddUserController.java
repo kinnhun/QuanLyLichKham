@@ -8,13 +8,16 @@ import dao.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.Users;
 
 @WebServlet(name = "AdminAddUserController", urlPatterns = {"/admin/add-user"})
+@MultipartConfig
 public class AdminAddUserController extends HttpServlet {
 
     /**
@@ -165,13 +168,118 @@ public class AdminAddUserController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/user-list");
         } else {
             request.setAttribute("error", "Có lỗi khi tạo tài khoản Admin.");
-            request.getRequestDispatcher("../views/admin/add-user.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/admin/user-list#admin-form");
         }
     }
 
-    private void handleAddReceptionist(HttpServletRequest request, HttpServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+  private void handleAddReceptionist(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    HttpSession session = request.getSession();
+
+    // Lấy các tham số từ request
+    String username = request.getParameter("username");
+    String password = request.getParameter("password");
+    String confirmPassword = request.getParameter("confirmPassword");
+    String fullName = request.getParameter("fullName");
+    String email = request.getParameter("email");
+    String phone = request.getParameter("phone");
+    String note = request.getParameter("note");
+    boolean isActive = request.getParameter("isActive") != null;
+
+    // Lấy các tham số cho Receptionist
+    String shiftType = request.getParameter("shiftType");
+    String workDays = request.getParameter("workDays");
+    String hireDate = request.getParameter("hireDate");
+    String address = request.getParameter("address");
+    String gender = request.getParameter("gender");
+    String birthDate = request.getParameter("birthDate");
+    String emergencyContact = request.getParameter("emergencyContact");
+    String receptionistNotes = request.getParameter("receptionistNotes");
+
+    // Xử lý upload ảnh
+    String photoUrl = "";
+    try {
+        photoUrl = request.getPart("photoUrl").getSubmittedFileName();
+    } catch (Exception e) {
+        System.out.println("Không lấy được file ảnh: " + e.getMessage());
     }
+
+    // Kiểm tra mật khẩu và xác nhận mật khẩu
+    if (!password.equals(confirmPassword)) {
+        session.setAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        return;
+    }
+
+    UserDAO userDAO = new UserDAO();
+
+    // Kiểm tra trùng username
+    if (userDAO.isUsernameExists(username)) {
+        session.setAttribute("error", "Username đã tồn tại.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        return;
+    }
+
+    // Kiểm tra trùng email
+    if (userDAO.isEmailExists(email)) {
+        session.setAttribute("error", "Email đã tồn tại.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        return;
+    }
+
+    // Kiểm tra trùng số điện thoại
+    if (phone != null && !phone.isEmpty() && userDAO.isPhoneExists(phone)) {
+        session.setAttribute("error", "Số điện thoại đã tồn tại.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        return;
+    }
+
+    // Tạo đối tượng Users
+    Users newUser = new Users();
+    newUser.setUsername(username);
+    newUser.setPasswordHash(password);
+    newUser.setFullName(fullName);
+    newUser.setEmail(email);
+    newUser.setPhone(phone);
+    newUser.setRole("Receptionist");
+    newUser.setIsActive(isActive);
+    newUser.setNote(note);
+
+    // Lưu Users
+    boolean success = userDAO.registerUser(newUser);
+
+    if (!success) {
+        session.setAttribute("error", "Có lỗi khi tạo tài khoản Receptionist.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        return;
+    }
+
+    // Lấy UserId của user vừa thêm
+    Users createdUser = userDAO.getUserByUsername(username);
+    if (createdUser == null) {
+        session.setAttribute("error", "Không lấy được thông tin UserId sau khi thêm.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        return;
+    }
+
+    int userId = createdUser.getUserId();
+
+    // Thêm thông tin vào bảng Receptionists
+    success = userDAO.insertReceptionist(
+            userId, shiftType, workDays, hireDate, photoUrl,
+            address, gender, birthDate, emergencyContact, receptionistNotes
+    );
+
+    if (success) {
+        session.setAttribute("message", "Thêm lễ tân thành công.");
+        response.sendRedirect(request.getContextPath() + "/admin/user-list");
+    } else {
+        session.setAttribute("error", "Có lỗi khi lưu thông tin Receptionist.");
+        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+    }
+}
+
 
     private void handleAddDoctor(HttpServletRequest request, HttpServletResponse response) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

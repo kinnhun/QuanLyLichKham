@@ -362,13 +362,83 @@ public class UserDAO extends DBContext {
 
         return list;
     }
-    
-    public static void main(String[] args) {
-        UserDAO udao = new UserDAO();
-         List<Users> list = udao.getAllUsers();
-         for (Users users : list) {
-             System.out.println(users.toString());
+
+    public Users getUserByUsername(String username) {
+        String sql = "SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Role, IsActive, Note, CreatedAt "
+                + "FROM Users WHERE Username = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("UserId"));
+                user.setUsername(rs.getString("Username"));
+                user.setPasswordHash(rs.getString("PasswordHash"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPhone(rs.getString("Phone"));
+                user.setRole(rs.getString("Role"));
+                user.setIsActive(rs.getBoolean("IsActive"));
+                user.setNote(rs.getString("Note"));
+                user.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                return user;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi getUserByUsername: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        return null; // Không tìm thấy
+    }
+
+    public boolean insertReceptionist(int userId, String shiftType, String workDays, String hireDate,
+            String photoUrl, String address, String gender, String birthDate,
+            String emergencyContact, String receptionistNotes) {
+
+        String sql = "INSERT INTO Receptionists (UserId, ShiftType, WorkDays, HireDate, PhotoUrl, "
+                + "Address, Gender, BirthDate, EmergencyContact, Notes, CreatedAt, UpdatedAt) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setString(2, shiftType);
+            ps.setString(3, workDays);
+
+            // Xử lý hireDate nullable
+            if (hireDate == null || hireDate.isEmpty()) {
+                ps.setNull(4, java.sql.Types.DATE);
+            } else {
+                ps.setDate(4, java.sql.Date.valueOf(hireDate));  // yyyy-MM-dd
+            }
+
+            ps.setString(5, photoUrl);
+            ps.setString(6, address);
+            ps.setString(7, gender);
+
+            // Xử lý birthDate nullable
+            if (birthDate == null || birthDate.isEmpty()) {
+                ps.setNull(8, java.sql.Types.DATE);
+            } else {
+                ps.setDate(8, java.sql.Date.valueOf(birthDate));  // yyyy-MM-dd
+            }
+
+            ps.setString(9, emergencyContact);
+            ps.setString(10, receptionistNotes);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi insertReceptionist: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 }

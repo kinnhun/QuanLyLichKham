@@ -55,11 +55,13 @@
                         <div id="roleSelection" class="row mb-4">
                             <h5>Chọn vai trò:</h5>
                             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                                <button type="button" class="btn btn-info" onclick="showForm('adminForm')">Quản trị viên</button>
-                                <button type="button" class="btn btn-primary" onclick="showForm('receptionistForm')">Lễ tân</button>
-                                <button type="button" class="btn btn-success" onclick="showForm('doctorForm')">Bác sĩ</button>
-                                <button type="button" class="btn btn-warning" onclick="showForm('patientForm')">Bệnh nhân</button>
+                                <a href="#admin-form" class="btn btn-info role-btn" role="button">Quản trị viên</a>
+                                <a href="#receptionist-form" class="btn btn-primary role-btn" role="button">Lễ tân</a>
+                                <a href="#doctor-form" class="btn btn-success role-btn" role="button">Bác sĩ</a>
+                                <a href="#patient-form" class="btn btn-warning role-btn" role="button">Bệnh nhân</a>
+
                             </div>
+
                         </div>
 
                         <!-- Bước 2: Form theo Role -->
@@ -100,25 +102,123 @@
 
 
                         <!-- Form Receptionist -->
-                        <div id="receptionistForm" class="role-form fade-in" style="display: none;">
-                            <h5>Form tạo Lễ tân</h5>
-                            <form action="add-user" method="post">
+                        <div id="receptionistForm" class="role-form fade-in container" style="display: none; max-width: 1200px;">
+                            <h5 class="mb-4">Form tạo Lễ tân</h5>
+                            <form action="add-user" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="role" value="Receptionist">
 
-                                <label>Username:</label>
-                                <input type="text" name="username" required>
+                                <div class="row g-4">
 
-                                <label>Họ và tên:</label>
-                                <input type="text" name="fullName" required>
+                                    <!-- Cột 1: Users fields -->
+                                    <div class="col-md-4">
+                                        <h6>Thông tin tài khoản</h6>
 
-                                <label>Số điện thoại:</label>
-                                <input type="text" name="phone">
+                                        <label>Username:</label>
+                                        <input type="text" name="username" required class="form-control" placeholder="Nhập username">
 
-                                <label>Email:</label>
-                                <input type="email" name="email" required>
+                                        <label class="mt-2">Mật khẩu:</label>
+                                        <input type="password" name="password" required class="form-control" placeholder="Nhập mật khẩu">
 
-                                <!-- Nút cùng hàng -->
-                                <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
+                                        <label class="mt-2">Xác nhận mật khẩu:</label>
+                                        <input type="password" name="confirmPassword" required class="form-control" placeholder="Nhập lại mật khẩu">
+
+                                        <label class="mt-2">Trạng thái (IsActive):</label>
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" name="isActive" class="form-check-input" checked>
+                                            <label class="form-check-label">Kích hoạt</label>
+                                        </div>
+
+                                        <label>Ghi chú (Note):</label>
+                                        <textarea name="note" rows="2" class="form-control" placeholder="Ghi chú"></textarea>
+                                    </div>
+
+                                    <!-- Cột 2: Thông tin cá nhân -->
+                                    <div class="col-md-4">
+                                        <h6>Thông tin cá nhân</h6>
+
+                                        <label>Họ và tên:</label>
+                                        <input type="text" name="fullName" required class="form-control" placeholder="Nhập họ và tên">
+
+                                        <label class="mt-2">Số điện thoại:</label>
+                                        <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại">
+
+                                        <label class="mt-2">Email:</label>
+                                        <input type="email" name="email" required class="form-control" placeholder="Nhập địa chỉ email">
+
+                                        <label class="mt-2">Địa chỉ:</label>
+                                        <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
+
+                                        <label class="mt-2">Giới tính:</label>
+                                        <select name="gender" class="form-select">
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+
+                                        <label class="mt-2">Ngày sinh:</label>
+                                        <input type="date" name="birthDate" class="form-control">
+                                    </div>
+
+                                    <!-- Cột 3: Thông tin công việc -->
+                                    <div class="col-md-4">
+                                        <h6>Thông tin công việc</h6>
+
+                                        <label>Ca làm (ShiftType):</label>
+                                        <select name="shiftType" required class="form-select">
+                                            <option value="Morning">Sáng</option>
+                                            <option value="Afternoon">Chiều</option>
+                                            <option value="Evening">Tối</option>
+                                            <option value="Full-time">Full-time</option>
+                                        </select>
+
+                                        <label class="mt-2">Ngày làm việc (WorkDays):</label>
+                                        <input type="text" name="workDays" class="form-control" placeholder="VD: Mon,Tue,Wed,Thu,Fri">
+
+                                        <label class="mt-2">Ngày vào làm (HireDate):</label>
+                                        <input type="date" name="hireDate" required class="form-control">
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Ảnh thẻ (PhotoUrl):</label>
+                                            <input type="file" name="photoUrl" accept="image/*" class="form-control" onchange="previewPhoto(event)">
+
+                                            <!-- Khung preview ảnh -->
+                                            <div class="mt-2">
+                                                <img id="photoPreview" src="#" alt="Preview ảnh" style="max-width: 100%; height: auto; display: none; border: 1px solid #ccc; padding: 4px;">
+                                            </div>
+                                        </div>
+                                        <script>
+                                            function previewPhoto(event) {
+                                                const input = event.target;
+                                                const preview = document.getElementById('photoPreview');
+
+                                                if (input.files && input.files[0]) {
+                                                    const reader = new FileReader();
+
+                                                    reader.onload = function (e) {
+                                                        preview.src = e.target.result;
+                                                        preview.style.display = 'block';
+                                                    };
+
+                                                    reader.readAsDataURL(input.files[0]);
+                                                } else {
+                                                    preview.src = '#';
+                                                    preview.style.display = 'none';
+                                                }
+                                            }
+                                        </script>
+
+
+                                        <label class="mt-2">Người liên hệ khẩn cấp (EmergencyContact):</label>
+                                        <input type="text" name="emergencyContact" class="form-control" placeholder="Nhập SĐT người liên hệ">
+
+                                        <label class="mt-2">Ghi chú khác:</label>
+                                        <textarea name="receptionistNotes" rows="2" class="form-control" placeholder="Ghi chú khác"></textarea>
+                                    </div>
+
+                                </div>
+
+                                <!-- Nút -->
+                                <div class="d-flex justify-content-between mt-4">
                                     <button type="submit" class="btn btn-success">Lưu Lễ tân</button>
                                     <button type="button" class="btn btn-secondary" onclick="goBack()">Quay lại</button>
                                 </div>
@@ -184,33 +284,58 @@
 
                     <!-- Script xử lý show form + quay lại -->
                     <script>
-                        function showForm(formId) {
+                        function showFormByHash() {
+                            const hash = window.location.hash;
+
+                            // Nếu không có hash hoặc hash rỗng, hiển thị phần chọn vai trò
+                            if (!hash || hash === '#') {
+                                document.getElementById('roleSelection').style.display = 'block';
+
+                                // Ẩn tất cả các biểu mẫu
+                                const forms = document.querySelectorAll('.role-form');
+                                forms.forEach(form => {
+                                    form.style.display = 'none';
+                                });
+                                return;
+                            }
+
+                            // Chuyển hash từ dạng 'admin-form' thành 'adminForm'
+                            const formId = hash.substring(1).split('-').map((word, index) => {
+                                if (index === 0)
+                                    return word;
+                                return word.charAt(0).toUpperCase() + word.slice(1);
+                            }).join('');
+
                             // Ẩn phần chọn vai trò
                             document.getElementById('roleSelection').style.display = 'none';
 
-                            // Ẩn tất cả các form
+                            // Ẩn tất cả các biểu mẫu
                             const forms = document.querySelectorAll('.role-form');
                             forms.forEach(form => {
                                 form.style.display = 'none';
                             });
 
-                            // Hiện form đã chọn
+                            // Hiển thị biểu mẫu tương ứng nếu tồn tại
                             const selectedForm = document.getElementById(formId);
-                            selectedForm.style.display = 'block';
-                            selectedForm.classList.add('fade-in');
+                            if (selectedForm) {
+                                selectedForm.style.display = 'block';
+                                selectedForm.classList.add('fade-in');
+                            }
                         }
 
                         function goBack() {
-                            // Ẩn tất cả các form
-                            const forms = document.querySelectorAll('.role-form');
-                            forms.forEach(form => {
-                                form.style.display = 'none';
-                            });
-
-                            // Hiện lại phần chọn vai trò
-                            document.getElementById('roleSelection').style.display = 'block';
+                            // Xóa hash trên URL
+                            window.location.hash = '';
                         }
+
+                        // Khi tải trang
+                        window.addEventListener('DOMContentLoaded', showFormByHash);
+
+                        // Khi hash trên URL thay đổi
+                        window.addEventListener('hashchange', showFormByHash);
                     </script>
+
+
 
 
                     <style>
@@ -350,6 +475,32 @@
                             background-color: #5a6268;
                             transform: translateY(-1px);
                         }
+                        .role-btn {
+                            min-width: 160px;
+                            padding: 12px 20px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            border-radius: 10px;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            text-decoration: none;
+                            margin: 10px;
+                            display: inline-block;
+                        }
+
+                        .role-btn:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                            text-decoration: none;
+                        }
+                        #roleSelection > div {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 15px;
+                        }
+
                     </style>
 
 
