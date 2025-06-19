@@ -88,11 +88,17 @@
                     </a>
                 </li>
                 <li class="nav-item">
-    <a class="nav-link" href="${pageContext.request.contextPath}/admin/departments">
-        <i class="fa fa-building menu-icon"></i>
-        <span class="menu-title">Quản lý khoa</span>
-    </a>
-</li>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/admin/departments">
+                        <i class="fa fa-building menu-icon"></i>
+                        <span class="menu-title">Quản lý khoa</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/admin/shifttypes">
+                        <i class="fa fa-clock menu-icon"></i>
+                        <span class="menu-title">Quản lý loại ca</span>
+                    </a>
+                </li>
 
 
 
