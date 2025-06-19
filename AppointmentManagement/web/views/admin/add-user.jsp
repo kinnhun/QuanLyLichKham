@@ -227,58 +227,185 @@
 
 
                         <!-- Form Doctor -->
-                        <div id="doctorForm" class="role-form fade-in" style="display: none;">
-                            <h5>Form tạo Bác sĩ</h5>
-                            <form action="add-user" method="post">
+                        <div id="doctorForm" class="role-form fade-in container py-4" style="display: none; max-width: 1200px;">
+                            <h5 class="mb-4">Form tạo Bác sĩ</h5>
+                            <form action="add-user" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="role" value="Doctor">
 
-                                <label>Username:</label>
-                                <input type="text" name="username" required>
+                                <div class="row g-4">
 
-                                <label>Họ và tên:</label>
-                                <input type="text" name="fullName" required>
+                                    <!-- Cột 1: Users fields -->
+                                    <div class="col-md-4">
+                                        <h6 class="mb-3">Thông tin tài khoản</h6>
 
-                                <label>Email:</label>
-                                <input type="email" name="email" required>
+                                        <div class="mb-3">
+                                            <label class="form-label">Username:</label>
+                                            <input type="text" name="username" required class="form-control" placeholder="Nhập username">
+                                        </div>
 
-                                <label>Chuyên khoa:</label>
-                                <input type="text" name="specialty">
+                                        <div class="mb-3">
+                                            <label class="form-label">Mật khẩu:</label>
+                                            <input type="password" name="password" required class="form-control" placeholder="Nhập mật khẩu">
+                                        </div>
 
-                                <!-- Nút cùng hàng -->
-                                <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
-                                    <button type="submit" class="btn btn-success">Lưu Bác sĩ</button>
-                                    <button type="button" class="btn btn-secondary" onclick="goBack()">Quay lại</button>
+                                        <div class="mb-3">
+                                            <label class="form-label">Xác nhận mật khẩu:</label>
+                                            <input type="password" name="confirmPassword" required class="form-control" placeholder="Nhập lại mật khẩu">
+                                        </div>
+
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" name="isActive" class="form-check-input" id="isActiveDoctor" checked>
+                                            <label class="form-check-label" for="isActiveDoctor">Kích hoạt</label>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Ghi chú (Note):</label>
+                                            <textarea name="note" rows="2" class="form-control" placeholder="Ghi chú"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cột 2: Thông tin cá nhân -->
+                                    <div class="col-md-4">
+                                        <h6 class="mb-3">Thông tin cá nhân</h6>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Họ và tên:</label>
+                                            <input type="text" name="fullName" required class="form-control" placeholder="Nhập họ và tên">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Email:</label>
+                                            <input type="email" name="email" required class="form-control" placeholder="Nhập email">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Số điện thoại:</label>
+                                            <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Giới tính:</label>
+                                            <select name="gender" class="form-select">
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                                <option value="Khác">Khác</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngày sinh:</label>
+                                            <input type="date" name="dateOfBirth" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <!-- Cột 3: Thông tin nghề nghiệp -->
+                                    <div class="col-md-4">
+                                        <h6 class="mb-3">Thông tin nghề nghiệp</h6>
+
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" name="isServiceDoctor" class="form-check-input" id="isServiceDoctor">
+                                            <label class="form-check-label" for="isServiceDoctor">Bác sĩ dịch vụ</label>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Chuyên khoa:</label>
+                                            <input type="text" name="specialization" class="form-control" placeholder="Nhập chuyên khoa">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Bằng cấp (Qualifications):</label>
+                                            <textarea name="qualifications" rows="2" class="form-control" placeholder="Nhập bằng cấp"></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Số năm kinh nghiệm:</label>
+                                            <input type="number" name="experienceYears" min="0" class="form-control" placeholder="Nhập số năm kinh nghiệm">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Mô tả:</label>
+                                            <textarea name="description" rows="2" class="form-control" placeholder="Nhập mô tả"></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Chức danh (PositionTitle):</label>
+                                            <input type="text" name="positionTitle" class="form-control" placeholder="Nhập chức danh">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Ảnh hồ sơ (ProfileImageUrl):</label>
+                                            <input type="file" name="profileImageUrl" accept="image/*" class="form-control" onchange="previewDoctorPhoto(event)">
+                                            <div class="mt-2">
+                                                <img id="doctorPhotoPreview" src="#" alt="Preview ảnh" style="max-width: 100%; height: auto; display: none; border: 1px solid #ccc; padding: 4px;">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
+
+                                <!-- Nút nhỏ bên phải -->
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="submit" class="btn btn-success btn-sm">Lưu Bác sĩ</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="goBack()">Quay lại</button>
+                                </div>
+
                             </form>
                         </div>
+                        <script>
+                            function previewDoctorPhoto(event) {
+                                const input = event.target;
+                                const preview = document.getElementById('doctorPhotoPreview');
 
+                                if (input.files && input.files[0]) {
+                                    const reader = new FileReader();
 
-                        <!-- Form Patient -->
-                        <div id="patientForm" class="role-form fade-in" style="display: none;">
-                            <h5>Form tạo Bệnh nhân</h5>
-                            <form action="add-user" method="post">
-                                <input type="hidden" name="role" value="Patient">
+                                    reader.onload = function (e) {
+                                        preview.src = e.target.result;
+                                        preview.style.display = 'block';
+                                    };
 
-                                <label>Username:</label>
-                                <input type="text" name="username" required>
+                                    reader.readAsDataURL(input.files[0]);
+                                } else {
+                                    preview.src = '#';
+                                    preview.style.display = 'none';
+                                }
+                            }
+                        </script>
 
-                                <label>Họ và tên:</label>
-                                <input type="text" name="fullName" required>
+<div id="patientForm" class="role-form fade-in" style="display: none;">
+    <h5>Form tạo Bệnh nhân</h5>
+    <form action="add-user" method="post">
+        <input type="hidden" name="role" value="Patient">
 
-                                <label>Email:</label>
-                                <input type="email" name="email" required>
+        <label>Username:</label>
+        <input type="text" name="username" required placeholder="Nhập username">
 
-                                <label>Ngày sinh:</label>
-                                <input type="date" name="dob">
+        <label>Họ và tên:</label>
+        <input type="text" name="fullName" required placeholder="Nhập họ và tên">
 
-                                <!-- Nút cùng hàng -->
-                                <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
-                                    <button type="submit" class="btn btn-success">Lưu Bệnh nhân</button>
-                                    <button type="button" class="btn btn-secondary" onclick="goBack()">Quay lại</button>
-                                </div>
-                            </form>
-                        </div>
+        <label>Email:</label>
+        <input type="email" name="email" required placeholder="Nhập email">
 
+        <label>Số điện thoại:</label>
+        <input type="text" name="phone" placeholder="Nhập số điện thoại">
+
+        <label>Ngày sinh:</label>
+        <input type="date" name="dob">
+
+        <label>Trạng thái kích hoạt:</label>
+        <input type="checkbox" name="isActive" checked> Kích hoạt
+
+        <label>Ghi chú:</label>
+        <textarea name="note" rows="2" placeholder="Ghi chú (nếu có)"></textarea>
+
+        <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
+            <button type="submit" class="btn btn-success">Lưu Bệnh nhân</button>
+            <button type="button" class="btn btn-secondary" onclick="goBack()">Quay lại</button>
+        </div>
+    </form>
+</div>
+
+                      
 
                     </div>
 

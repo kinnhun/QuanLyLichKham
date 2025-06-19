@@ -94,6 +94,9 @@ public class AdminAddUserController extends HttpServlet {
             case "Doctor":
                 handleAddDoctor(request, response);
                 break;
+            case "Patient":
+                handleAddPatient(request, response);
+                break;
 
             default:
                 // Nếu role không hợp lệ
@@ -126,7 +129,7 @@ public class AdminAddUserController extends HttpServlet {
         // Validate password confirm
         if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
-            doGet(request, response);         
+            doGet(request, response);
             return;
         }
 
@@ -135,19 +138,19 @@ public class AdminAddUserController extends HttpServlet {
         // Validate trùng username / email / phone
         if (userDAO.isUsernameExists(username)) {
             request.setAttribute("error", "Username đã tồn tại.");
-            doGet(request, response);         
+            doGet(request, response);
             return;
         }
 
         if (userDAO.isEmailExists(email)) {
             request.setAttribute("error", "Email đã tồn tại.");
-            doGet(request, response);         
+            doGet(request, response);
             return;
         }
 
         if (phone != null && !phone.isEmpty() && userDAO.isPhoneExists(phone)) {
             request.setAttribute("error", "Số điện thoại đã tồn tại.");
-            doGet(request, response);         
+            doGet(request, response);
             return;
         }
 
@@ -172,117 +175,274 @@ public class AdminAddUserController extends HttpServlet {
         }
     }
 
-  private void handleAddReceptionist(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    private void handleAddReceptionist(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    HttpSession session = request.getSession();
+        HttpSession session = request.getSession();
 
-    // Lấy các tham số từ request
-    String username = request.getParameter("username");
-    String password = request.getParameter("password");
-    String confirmPassword = request.getParameter("confirmPassword");
-    String fullName = request.getParameter("fullName");
-    String email = request.getParameter("email");
-    String phone = request.getParameter("phone");
-    String note = request.getParameter("note");
-    boolean isActive = request.getParameter("isActive") != null;
+        // Lấy các tham số từ request
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        String note = request.getParameter("note");
+        boolean isActive = request.getParameter("isActive") != null;
 
-    // Lấy các tham số cho Receptionist
-    String shiftType = request.getParameter("shiftType");
-    String workDays = request.getParameter("workDays");
-    String hireDate = request.getParameter("hireDate");
-    String address = request.getParameter("address");
-    String gender = request.getParameter("gender");
-    String birthDate = request.getParameter("birthDate");
-    String emergencyContact = request.getParameter("emergencyContact");
-    String receptionistNotes = request.getParameter("receptionistNotes");
+        // Lấy các tham số cho Receptionist
+        String shiftType = request.getParameter("shiftType");
+        String workDays = request.getParameter("workDays");
+        String hireDate = request.getParameter("hireDate");
+        String address = request.getParameter("address");
+        String gender = request.getParameter("gender");
+        String birthDate = request.getParameter("birthDate");
+        String emergencyContact = request.getParameter("emergencyContact");
+        String receptionistNotes = request.getParameter("receptionistNotes");
 
-    // Xử lý upload ảnh
-    String photoUrl = "";
-    try {
-        photoUrl = request.getPart("photoUrl").getSubmittedFileName();
-    } catch (Exception e) {
-        System.out.println("Không lấy được file ảnh: " + e.getMessage());
+        // Xử lý upload ảnh
+        String photoUrl = "";
+        try {
+            photoUrl = request.getPart("photoUrl").getSubmittedFileName();
+        } catch (Exception e) {
+            System.out.println("Không lấy được file ảnh: " + e.getMessage());
+        }
+
+        // Kiểm tra mật khẩu và xác nhận mật khẩu
+        if (!password.equals(confirmPassword)) {
+            session.setAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+            return;
+        }
+
+        UserDAO userDAO = new UserDAO();
+
+        // Kiểm tra trùng username
+        if (userDAO.isUsernameExists(username)) {
+            session.setAttribute("error", "Username đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+            return;
+        }
+
+        // Kiểm tra trùng email
+        if (userDAO.isEmailExists(email)) {
+            session.setAttribute("error", "Email đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+            return;
+        }
+
+        // Kiểm tra trùng số điện thoại
+        if (phone != null && !phone.isEmpty() && userDAO.isPhoneExists(phone)) {
+            session.setAttribute("error", "Số điện thoại đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+            return;
+        }
+
+        // Tạo đối tượng Users
+        Users newUser = new Users();
+        newUser.setUsername(username);
+        newUser.setPasswordHash(password);
+        newUser.setFullName(fullName);
+        newUser.setEmail(email);
+        newUser.setPhone(phone);
+        newUser.setRole("Receptionist");
+        newUser.setIsActive(isActive);
+        newUser.setNote(note);
+
+        // Lưu Users
+        boolean success = userDAO.registerUser(newUser);
+
+        if (!success) {
+            session.setAttribute("error", "Có lỗi khi tạo tài khoản Receptionist.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+            return;
+        }
+
+        // Lấy UserId của user vừa thêm
+        Users createdUser = userDAO.getUserByUsername(username);
+        if (createdUser == null) {
+            session.setAttribute("error", "Không lấy được thông tin UserId sau khi thêm.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+            return;
+        }
+
+        int userId = createdUser.getUserId();
+
+        // Thêm thông tin vào bảng Receptionists
+        success = userDAO.insertReceptionist(
+                userId, shiftType, workDays, hireDate, photoUrl,
+                address, gender, birthDate, emergencyContact, receptionistNotes
+        );
+
+        if (success) {
+            session.setAttribute("message", "Thêm lễ tân thành công.");
+            response.sendRedirect(request.getContextPath() + "/admin/user-list");
+        } else {
+            session.setAttribute("error", "Có lỗi khi lưu thông tin Receptionist.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
+        }
     }
 
-    // Kiểm tra mật khẩu và xác nhận mật khẩu
-    if (!password.equals(confirmPassword)) {
-        session.setAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-        return;
+    private void handleAddDoctor(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+
+        // Lấy các trường Users
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        String note = request.getParameter("note");
+        boolean isActive = request.getParameter("isActive") != null;
+
+        // Lấy các trường Doctors
+        boolean isServiceDoctor = request.getParameter("isServiceDoctor") != null;
+        String gender = request.getParameter("gender");
+        String dateOfBirth = request.getParameter("dateOfBirth");
+        String specialization = request.getParameter("specialization");
+        String qualifications = request.getParameter("qualifications");
+        String experienceYearsStr = request.getParameter("experienceYears");
+        int experienceYears = (experienceYearsStr == null || experienceYearsStr.isEmpty()) ? 0 : Integer.parseInt(experienceYearsStr);
+        String description = request.getParameter("description");
+        String positionTitle = request.getParameter("positionTitle");
+
+        // Xử lý upload ảnh
+        String profileImageUrl = "";
+        try {
+            profileImageUrl = request.getPart("profileImageUrl").getSubmittedFileName();
+        } catch (Exception e) {
+            System.out.println("Không lấy được file ảnh: " + e.getMessage());
+        }
+
+        // Kiểm tra mật khẩu
+        if (!password.equals(confirmPassword)) {
+            session.setAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+            return;
+        }
+
+        UserDAO userDAO = new UserDAO();
+
+        // Kiểm tra username
+        if (userDAO.isUsernameExists(username)) {
+            session.setAttribute("error", "Username đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+            return;
+        }
+
+        // Kiểm tra email
+        if (userDAO.isEmailExists(email)) {
+            session.setAttribute("error", "Email đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+            return;
+        }
+
+        // Kiểm tra phone
+        if (phone != null && !phone.isEmpty() && userDAO.isPhoneExists(phone)) {
+            session.setAttribute("error", "Số điện thoại đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+            return;
+        }
+
+        // Tạo Users
+        Users newUser = new Users();
+        newUser.setUsername(username);
+        newUser.setPasswordHash(password);
+        newUser.setFullName(fullName);
+        newUser.setEmail(email);
+        newUser.setPhone(phone);
+        newUser.setRole("Doctor");
+        newUser.setIsActive(isActive);
+        newUser.setNote(note);
+
+        // Lưu Users
+        boolean success = userDAO.registerUser(newUser);
+
+        if (!success) {
+            session.setAttribute("error", "Có lỗi khi tạo tài khoản Doctor.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+            return;
+        }
+
+        // Lấy UserId vừa tạo
+        Users createdUser = userDAO.getUserByUsername(username);
+        if (createdUser == null) {
+            session.setAttribute("error", "Không lấy được thông tin UserId sau khi thêm.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+            return;
+        }
+
+        int userId = createdUser.getUserId();
+
+        // Insert Doctors
+        success = userDAO.insertDoctor(
+                userId, isServiceDoctor, gender, dateOfBirth, specialization,
+                qualifications, experienceYears, description, profileImageUrl, positionTitle
+        );
+
+        if (success) {
+            session.setAttribute("message", "Thêm bác sĩ thành công.");
+            response.sendRedirect(request.getContextPath() + "/admin/user-list");
+        } else {
+            session.setAttribute("error", "Có lỗi khi lưu thông tin Doctor.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#doctor-form");
+        }
     }
 
-    UserDAO userDAO = new UserDAO();
+    private void handleAddPatient(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    // Kiểm tra trùng username
-    if (userDAO.isUsernameExists(username)) {
-        session.setAttribute("error", "Username đã tồn tại.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-        return;
-    }
+        HttpSession session = request.getSession();
 
-    // Kiểm tra trùng email
-    if (userDAO.isEmailExists(email)) {
-        session.setAttribute("error", "Email đã tồn tại.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-        return;
-    }
+        String username = request.getParameter("username");
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        String dob = request.getParameter("dob"); // nếu cần dùng để lưu thêm sau này
+        String note = request.getParameter("note");
+        boolean isActive = request.getParameter("isActive") != null;
 
-    // Kiểm tra trùng số điện thoại
-    if (phone != null && !phone.isEmpty() && userDAO.isPhoneExists(phone)) {
-        session.setAttribute("error", "Số điện thoại đã tồn tại.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-        return;
-    }
+        UserDAO userDAO = new UserDAO();
 
-    // Tạo đối tượng Users
-    Users newUser = new Users();
-    newUser.setUsername(username);
-    newUser.setPasswordHash(password);
-    newUser.setFullName(fullName);
-    newUser.setEmail(email);
-    newUser.setPhone(phone);
-    newUser.setRole("Receptionist");
-    newUser.setIsActive(isActive);
-    newUser.setNote(note);
+        // Kiểm tra trùng username
+        if (userDAO.isUsernameExists(username)) {
+            session.setAttribute("error", "Username đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#patient-form");
+            return;
+        }
 
-    // Lưu Users
-    boolean success = userDAO.registerUser(newUser);
+        // Kiểm tra trùng email
+        if (userDAO.isEmailExists(email)) {
+            session.setAttribute("error", "Email đã tồn tại.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#patient-form");
+            return;
+        }
 
-    if (!success) {
-        session.setAttribute("error", "Có lỗi khi tạo tài khoản Receptionist.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-        return;
-    }
+        // Mật khẩu mặc định
+        String defaultPassword = "123456";
 
-    // Lấy UserId của user vừa thêm
-    Users createdUser = userDAO.getUserByUsername(username);
-    if (createdUser == null) {
-        session.setAttribute("error", "Không lấy được thông tin UserId sau khi thêm.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-        return;
-    }
+        Users newUser = new Users();
+        newUser.setUsername(username);
+        newUser.setPasswordHash(defaultPassword); // sẽ được hash trong DAO
+        newUser.setFullName(fullName);
+        newUser.setEmail(email);
+        newUser.setPhone(phone);
+        newUser.setRole("Patient");
+        newUser.setIsActive(isActive);
+        newUser.setNote(note);
 
-    int userId = createdUser.getUserId();
+        boolean success = userDAO.registerUser(newUser);
 
-    // Thêm thông tin vào bảng Receptionists
-    success = userDAO.insertReceptionist(
-            userId, shiftType, workDays, hireDate, photoUrl,
-            address, gender, birthDate, emergencyContact, receptionistNotes
-    );
-
-    if (success) {
-        session.setAttribute("message", "Thêm lễ tân thành công.");
-        response.sendRedirect(request.getContextPath() + "/admin/user-list");
-    } else {
-        session.setAttribute("error", "Có lỗi khi lưu thông tin Receptionist.");
-        response.sendRedirect(request.getContextPath() + "/admin/add-user#receptionist-form");
-    }
-}
-
-
-    private void handleAddDoctor(HttpServletRequest request, HttpServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (success) {
+            session.setAttribute("message", "Thêm bệnh nhân thành công.");
+            response.sendRedirect(request.getContextPath() + "/admin/user-list");
+        } else {
+            session.setAttribute("error", "Có lỗi khi tạo tài khoản bệnh nhân.");
+            response.sendRedirect(request.getContextPath() + "/admin/add-user#patient-form");
+        }
     }
 
 }

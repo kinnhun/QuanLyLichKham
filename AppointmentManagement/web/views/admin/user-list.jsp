@@ -46,29 +46,29 @@
                             <div class="col-12 grid-margin stretch-card">
                                 <div class="card">
                                     <div class="card-body">
-                                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h4 class="card-title" style="margin: 0;">Danh sách Users</h4>
-    <div>
-        <button onclick="createUser()" style="
-    background-color: #3fbbc0;
-    color: white;
-    border: none;
-    padding: 7px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: background-color 0.3s ease;
-">+ Tạo người dùng</button>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                            <h4 class="card-title" style="margin: 0;">Danh sách Users</h4>
+                                            <div>
+                                                <button onclick="createUser()" style="
+                                                        background-color: #3fbbc0;
+                                                        color: white;
+                                                        border: none;
+                                                        padding: 7px 14px;
+                                                        border-radius: 6px;
+                                                        cursor: pointer;
+                                                        font-size: 13px;
+                                                        transition: background-color 0.3s ease;
+                                                        ">+ Tạo người dùng</button>
 
-<script>
-    function createUser() {
-        window.location.href = 'add-user'; // trỏ đến controller AddUserController
-    }
-</script>
+                                                <script>
+                                                    function createUser() {
+                                                        window.location.href = 'add-user'; // trỏ đến controller AddUserController
+                                                    }
+                                                </script>
 
-       
-    </div>
-</div>
+
+                                            </div>
+                                        </div>
 
 
 
@@ -112,6 +112,8 @@
                                                             <th class="text-center" style="min-width: 120px;">Trạng thái</th>
                                                             <th class="text-start" style="min-width: 200px;">Ghi chú</th>
                                                             <th class="text-center" style="min-width: 150px;">Ngày tạo</th>
+                                                            <th class="text-center" style="min-width: 150px;">Hành động</th>
+
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -155,11 +157,87 @@
                                                                 <td class="text-center">
                                                                     <fmt:formatDate value="${user.createdAt}" pattern="dd/MM/yyyy HH:mm" />
                                                                 </td>
+                                                                <td class="text-center">
+                                                                    <button 
+                                                                        type="button" 
+                                                                        class="btn btn-sm ${user.isActive ? 'btn-danger' : 'btn-success'}" 
+                                                                        data-userid="${user.userId}" 
+                                                                        data-username="${user.username}" 
+                                                                        data-isactive="${user.isActive}" 
+                                                                        onclick="openToggleModal(this)">
+                                                                        ${user.isActive ? 'Ban' : 'Unban'}
+                                                                    </button>
+                                                                </td>
                                                             </tr>
                                                         </c:forEach>
                                                     </tbody>
                                                 </table>
                                             </div>
+
+                                            <!-- Modal xác nhận Ban/Unban -->
+                                            <div class="modal fade" id="confirmToggleModal" tabindex="-1" aria-labelledby="confirmToggleModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <form id="toggleForm" method="post" action="toggle-user-status">
+                                                        <input type="hidden" name="userId" id="modalUserId" />
+                                                        <input type="hidden" name="newStatus" id="modalNewStatus" />
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="confirmToggleModalLabel">Xác nhận hành động</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p id="modalBodyContent"></p>
+                                                                <div id="banReasonGroup" style="display:none; margin-top: 1rem;">
+                                                                    <label for="banReasonInput" class="form-label">Lý do ban:</label>
+                                                                    <input type="text" name="banReason" id="banReasonInput" class="form-control" placeholder="Nhập lý do ban" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                                <button type="submit" class="btn btn-primary">Xác nhận</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+
+                                            <script>
+                                                function openToggleModal(button) {
+                                                    const userId = button.getAttribute('data-userid');
+                                                    const username = button.getAttribute('data-username');
+                                                    const isActive = button.getAttribute('data-isactive') === 'true';
+
+                                                    // Set hidden inputs
+                                                    document.getElementById('modalUserId').value = userId;
+                                                    document.getElementById('modalNewStatus').value = !isActive;
+
+                                                    const actionText = isActive ? 'ban' : 'unban';
+                                                    document.getElementById('modalBodyContent').innerText = `Bạn có chắc muốn ${actionText} user "${username}" không?`;
+
+                                                    // Hiện hoặc ẩn input lý do ban
+                                                    const banReasonGroup = document.getElementById('banReasonGroup');
+                                                    const banReasonInput = document.getElementById('banReasonInput');
+
+                                                    if (isActive) {
+                                                        // Nếu đang active thì đang ban → show input lý do và clear value
+                                                        banReasonGroup.style.display = 'block';
+                                                        banReasonInput.value = '';
+                                                        banReasonInput.required = true;
+                                                    } else {
+                                                        // Nếu đang bị ban, chuẩn bị unban → ẩn input lý do
+                                                        banReasonGroup.style.display = 'none';
+                                                        banReasonInput.value = '';
+                                                        banReasonInput.required = false;
+                                                    }
+
+                                                    // Hiển thị modal
+                                                    const modal = new bootstrap.Modal(document.getElementById('confirmToggleModal'));
+                                                    modal.show();
+                                                }
+
+                                            </script>
+
 
                                             <!-- Nút phân trang - căn phải -->
                                             <div style="margin-top: 12px; display: flex; justify-content: flex-end; align-items: center; font-size: 13px;">
