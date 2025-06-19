@@ -99,6 +99,12 @@
                         <span class="menu-title">Quản lý loại ca</span>
                     </a>
                 </li>
+<li class="nav-item">
+    <a class="nav-link" href="${pageContext.request.contextPath}/admin/shifts">
+        <i class="fa fa-calendar menu-icon"></i>
+        <span class="menu-title">Quản lý ca làm</span>
+    </a>
+</li>
 
 
 
