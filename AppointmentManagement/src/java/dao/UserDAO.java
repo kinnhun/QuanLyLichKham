@@ -543,5 +543,42 @@ public class UserDAO extends DBContext {
             return false;
         }
     }
+    // Kiểm tra mật khẩu hiện tại có đúng không
+public boolean checkPassword(int userId, String currentPassword) {
+    String sql = "SELECT PasswordHash FROM Users WHERE UserId = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setInt(1, userId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            String hashed = rs.getString("PasswordHash");
+            String currentPasswordHash = PasswordUtils.hashPassword(currentPassword);
+            return hashed != null && hashed.equals(currentPasswordHash);
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi checkPassword: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return false;
+}
+
+// Đổi mật khẩu mới (hash trước khi lưu)
+public boolean updatePassword1(int userId, String newPassword) {
+    String sql = "UPDATE Users SET PasswordHash = ? WHERE UserId = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        String newHashedPassword = PasswordUtils.hashPassword(newPassword);
+        ps.setString(1, newHashedPassword);
+        ps.setInt(2, userId);
+        int rows = ps.executeUpdate();
+        return rows > 0;
+    } catch (Exception e) {
+        System.out.println("Lỗi khi updatePassword1: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return false;
+}
 
 }
