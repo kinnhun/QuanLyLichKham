@@ -82,13 +82,20 @@
                 </li>
 
                 <li class="nav-item">
-    <a class="nav-link" href="${pageContext.request.contextPath}/admin/user-list">
-        <i class="fa fa-users menu-icon"></i>
-        <span class="menu-title">Quản lý tài khoản</span>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/admin/user-list">
+                        <i class="fa fa-users menu-icon"></i>
+                        <span class="menu-title">Quản lý tài khoản</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+    <a class="nav-link" href="${pageContext.request.contextPath}/admin/departments">
+        <i class="fa fa-building menu-icon"></i>
+        <span class="menu-title">Quản lý khoa</span>
     </a>
 </li>
 
-                
+
+
             </ul>
         </nav>
 
