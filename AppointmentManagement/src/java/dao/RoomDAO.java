@@ -94,5 +94,35 @@ public boolean isDuplicateRoom(String roomName, int departmentId, int floor, Str
     }
     return false;
 }
+public Room getRoomById(int roomId) {
+    String sql = "SELECT r.RoomId, r.RoomName, r.Floor, r.RoomType, r.Description, " +
+                 "d.DepartmentId, d.DepartmentName, d.Description AS DeptDesc " +
+                 "FROM Rooms r JOIN Departments d ON r.DepartmentId = d.DepartmentId " +
+                 "WHERE r.RoomId = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, roomId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            Department dept = new Department();
+            dept.setDepartmentId(rs.getInt("DepartmentId"));
+            dept.setDepartmentName(rs.getString("DepartmentName"));
+            dept.setDescription(rs.getString("DeptDesc"));
+
+            Room room = new Room();
+            room.setRoomId(rs.getInt("RoomId"));
+            room.setRoomName(rs.getString("RoomName"));
+            room.setDepartmentId(dept);
+            room.setFloor(rs.getInt("Floor"));
+            room.setRoomType(rs.getString("RoomType"));
+            room.setDescription(rs.getString("Description"));
+
+            return room;
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 
 }

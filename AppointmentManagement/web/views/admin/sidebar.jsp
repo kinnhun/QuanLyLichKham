@@ -111,6 +111,12 @@
                         <span class="menu-title">Quản lý phòng</span>
                     </a>
                 </li>
+<li class="nav-item">
+    <a class="nav-link" href="${pageContext.request.contextPath}/admin/doctor-rooms">
+        <i class="fa fa-user-md menu-icon"></i>
+        <span class="menu-title">Phân công bác sĩ</span>
+    </a>
+</li>
 
 
 
