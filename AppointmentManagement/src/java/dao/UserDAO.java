@@ -441,92 +441,107 @@ public class UserDAO extends DBContext {
         return false;
     }
 
-    public boolean insertDoctor(int userId, boolean isServiceDoctor, String gender, String dateOfBirth, 
-                            String specialization, String qualifications, int experienceYears, 
-                            String description, String profileImageUrl, String positionTitle) {
+    public boolean insertDoctor(int userId, boolean isServiceDoctor, String gender, String dateOfBirth,
+            String specialization, String qualifications, int experienceYears,
+            String description, String profileImageUrl, String positionTitle) {
 
-    String sql = "INSERT INTO Doctors (UserId, IsServiceDoctor, IsActive, Gender, DateOfBirth, "
-               + "Specialization, Qualifications, ExperienceYears, Description, ProfileImageUrl, "
-               + "PositionTitle, CreatedDate, UpdatedDate) "
-               + "VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
+        String sql = "INSERT INTO Doctors (UserId, IsServiceDoctor, IsActive, Gender, DateOfBirth, "
+                + "Specialization, Qualifications, ExperienceYears, Description, ProfileImageUrl, "
+                + "PositionTitle, CreatedDate, UpdatedDate) "
+                + "VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
 
-    try (Connection conn = new DBContext().getConnection(); 
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, userId);
-        ps.setBoolean(2, isServiceDoctor);
-        ps.setString(3, gender);
+            ps.setInt(1, userId);
+            ps.setBoolean(2, isServiceDoctor);
+            ps.setString(3, gender);
 
-        // Xử lý DateOfBirth
-        if (dateOfBirth == null || dateOfBirth.isEmpty()) {
-            ps.setNull(4, java.sql.Types.DATE);
-        } else {
-            ps.setDate(4, java.sql.Date.valueOf(dateOfBirth));
+            // Xử lý DateOfBirth
+            if (dateOfBirth == null || dateOfBirth.isEmpty()) {
+                ps.setNull(4, java.sql.Types.DATE);
+            } else {
+                ps.setDate(4, java.sql.Date.valueOf(dateOfBirth));
+            }
+
+            ps.setString(5, specialization);
+            ps.setString(6, qualifications);
+            ps.setInt(7, experienceYears);
+            ps.setString(8, description);
+            ps.setString(9, profileImageUrl);
+            ps.setString(10, positionTitle);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi insertDoctor: " + e.getMessage());
+            e.printStackTrace();
         }
 
-        ps.setString(5, specialization);
-        ps.setString(6, qualifications);
-        ps.setInt(7, experienceYears);
-        ps.setString(8, description);
-        ps.setString(9, profileImageUrl);
-        ps.setString(10, positionTitle);
-
-        int rows = ps.executeUpdate();
-        return rows > 0;
-
-    } catch (Exception e) {
-        System.out.println("Lỗi khi insertDoctor: " + e.getMessage());
-        e.printStackTrace();
+        return false;
     }
 
-    return false;
-}
-
-
-public boolean updateUserStatus(int userId, boolean isActive) {
-    String sql = "UPDATE Users SET IsActive = ? WHERE UserId = ?";
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setBoolean(1, isActive);
-        ps.setInt(2, userId);
-        return ps.executeUpdate() > 0;
-    } catch (Exception e) {
-        System.out.println("Lỗi khi updateUserStatus: " + e.getMessage());
-        e.printStackTrace();
+    public boolean updateUserStatus(int userId, boolean isActive) {
+        String sql = "UPDATE Users SET IsActive = ? WHERE UserId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isActive);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Lỗi khi updateUserStatus: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
 
-public boolean deactivateUser(int userId, String banReason) {
-    String sql = "UPDATE Users SET IsActive = 0, Note = ? WHERE UserId = ?";
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+    public boolean deactivateUser(int userId, String banReason) {
+        String sql = "UPDATE Users SET IsActive = 0, Note = ? WHERE UserId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setString(1, banReason != null ? banReason : "");
-        ps.setInt(2, userId);
+            ps.setString(1, banReason != null ? banReason : "");
+            ps.setInt(2, userId);
 
-        return ps.executeUpdate() > 0;
-    } catch (Exception e) {
-        System.out.println("Lỗi khi deactivateUser: " + e.getMessage());
-        e.printStackTrace();
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Lỗi khi deactivateUser: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
 
-public boolean activateUser(int userId) {
-    String sql = "UPDATE Users SET IsActive = 1 WHERE UserId = ?";
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+    public boolean activateUser(int userId) {
+        String sql = "UPDATE Users SET IsActive = 1 WHERE UserId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, userId);
+            ps.setInt(1, userId);
 
-        return ps.executeUpdate() > 0;
-    } catch (Exception e) {
-        System.out.println("Lỗi khi activateUser: " + e.getMessage());
-        e.printStackTrace();
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Lỗi khi activateUser: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
 
+    public boolean updateUser(Users user) {
+        String sql = "UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Note = ? WHERE UserId = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPhone());
+            ps.setString(4, user.getNote());
+            ps.setInt(5, user.getUserId());
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi updateUser: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

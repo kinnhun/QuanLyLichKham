@@ -118,7 +118,7 @@
                                                     </thead>
                                                     <tbody>
                                                         <c:forEach var="user" items="${userList}">
-                                                            <tr>
+                                                            <tr class="clickable-row" onclick="handleRowClick(event, ${user.userId})">
                                                                 <td class="text-center">${user.userId}</td>
                                                                 <td class="text-start">${user.username}</td>
                                                                 <td class="text-start">${user.fullName}</td>
@@ -158,21 +158,33 @@
                                                                     <fmt:formatDate value="${user.createdAt}" pattern="dd/MM/yyyy HH:mm" />
                                                                 </td>
                                                                 <td class="text-center">
-                                                                    <button 
-                                                                        type="button" 
-                                                                        class="btn btn-sm ${user.isActive ? 'btn-danger' : 'btn-success'}" 
-                                                                        data-userid="${user.userId}" 
-                                                                        data-username="${user.username}" 
-                                                                        data-isactive="${user.isActive}" 
-                                                                        onclick="openToggleModal(this)">
-                                                                        ${user.isActive ? 'Ban' : 'Unban'}
-                                                                    </button>
+                                                                    <c:if test="${user.role ne 'Admin'}">
+                                                                        <button 
+                                                                            type="button" 
+                                                                            class="btn btn-sm ${user.isActive ? 'btn-danger' : 'btn-success'}" 
+                                                                            data-userid="${user.userId}" 
+                                                                            data-username="${user.username}" 
+                                                                            data-isactive="${user.isActive}" 
+                                                                            onclick="event.stopPropagation(); openToggleModal(this)">
+                                                                            ${user.isActive ? 'Ban' : 'Unban'}
+                                                                        </button>
+
+                                                                    </c:if>
+                                                                    <c:if test="${user.role eq 'Admin'}">
+                                                                        <span class="text-muted" style="font-size: 12px;">Không khả dụng</span>
+                                                                    </c:if>
                                                                 </td>
+
                                                             </tr>
                                                         </c:forEach>
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            <script>
+                                                function handleRowClick(event, userId) {
+                                                    window.location.href = 'user-detail?userId=' + userId;
+                                                }
+                                            </script>
 
                                             <!-- Modal xác nhận Ban/Unban -->
                                             <div class="modal fade" id="confirmToggleModal" tabindex="-1" aria-labelledby="confirmToggleModalLabel" aria-hidden="true">
